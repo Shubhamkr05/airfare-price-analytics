@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Airfare Price Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="container">
+    <section class="card form-card">
+      <div class="topbar">
+        <div class="hero-copy">
+          <p class="eyebrow">Airfare Intelligence</p>
+          <h1>Check a likely fare before booking.</h1>
+          <p class="subtitle">Quick airfare estimates from route, timing, and market signals.</p>
+        </div>
+        <div class="hero-panel">
+          <p class="panel-label">Signals used</p>
+          <p class="panel-text">Route, cabin, demand, seasonality, timing, competitor price, and load factor.</p>
+        </div>
+      </div>
+
+      {% if error %}
+      <div class="alert error">{{ error }}</div>
+      {% endif %}
+
+      {% if prediction is not none %}
+      <div class="alert success">
+        <span class="alert-label">Estimated Fare</span>
+        <strong>INR {{ prediction }}</strong>
+      </div>
+      {% endif %}
+
+      {% if not available_models %}
+      <div class="alert warn">
+        No trained models found. Train the project first:
+        <code>python -m src.airfare.train --data data/airfare_sample.csv --target fare_price --model-dir models</code>
+      </div>
+      {% endif %}
+
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Prediction Form</p>
+          <h2>Trip inputs</h2>
+        </div>
+        <p class="section-note">Enter the trip details and generate an estimate.</p>
+      </div>
+
+      <form method="post" class="grid">
+        <label><span>Prediction Model</span>
+          <select name="model_name">
+            {% for model in available_models %}
+            <option value="{{ model }}" {% if selected_model == model %}selected{% endif %}>
+              {% if model == 'linear_regression' %}Linear Regression{% elif model == 'xgboost_regression' %}XGBoost Regression{% else %}{{ model|replace('_', ' ')|title }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label><span>Origin</span>
+          <input name="origin" value="{{ payload.origin if payload else 'DEL' }}" required>
+        </label>
+
+        <label><span>Destination</span>
+          <input name="destination" value="{{ payload.destination if payload else 'BOM' }}" required>
+        </label>
+
+        <label><span>Cabin Class</span>
+          <select name="cabin_class">
+            {% set cc = payload.cabin_class if payload else 'Economy' %}
+            <option value="Economy" {% if cc == 'Economy' %}selected{% endif %}>Economy</option>
+            <option value="Premium Economy" {% if cc == 'Premium Economy' %}selected{% endif %}>Premium Economy</option>
+            <option value="Business" {% if cc == 'Business' %}selected{% endif %}>Business</option>
+          </select>
+        </label>
+
+        <label><span>Demand Index</span>
+          <input type="number" step="0.01" name="demand_index" value="{{ payload.demand_index if payload else 1.0 }}" required>
+          <small>Suggested range: 0.4 to 1.8</small>
+        </label>
+
+        <label><span>Seasonality Index</span>
+          <input type="number" step="0.01" name="seasonality_index" value="{{ payload.seasonality_index if payload else 1.0 }}" required>
+          <small>Suggested range: 0.5 to 1.7</small>
+        </label>
+
+        <label><span>Days to Departure</span>
+          <input type="number" name="days_to_departure" value="{{ payload.days_to_departure if payload else 30 }}" required>
+        </label>
+
+        <label><span>Weekend Before Departure</span>
+          <input type="number" min="0" max="1" name="weekend_before_departure" value="{{ payload.weekend_before_departure if payload else 0 }}" required>
+          <small>Use 1 for yes, 0 for no</small>
+        </label>
+
+        <label><span>Fuel Cost Index</span>
+          <input type="number" step="0.01" name="fuel_cost_index" value="{{ payload.fuel_cost_index if payload else 1.0 }}" required>
+          <small>Suggested range: 0.6 to 1.5</small>
+        </label>
+
+        <label><span>Holiday Flag</span>
+          <input type="number" min="0" max="1" name="holiday_flag" value="{{ payload.holiday_flag if payload else 0 }}" required>
+          <small>Use 1 for yes, 0 for no</small>
+        </label>
+
+        <label><span>Competitor Price</span>
+          <input type="number" step="0.01" name="competitor_price" value="{{ payload.competitor_price if payload else 5000 }}" required>
+        </label>
+
+        <label><span>Load Factor</span>
+          <input type="number" step="0.01" name="load_factor" value="{{ payload.load_factor if payload else 0.8 }}" required>
+          <small>Suggested range: 0.35 to 0.98</small>
+        </label>
+
+        <button type="submit">Generate Fare Estimate</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
