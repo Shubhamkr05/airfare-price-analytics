@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Airfare Price Prediction
 
 This project predicts flight ticket prices from route, booking window, seasonality, demand, fuel cost, competitor price, and load factor signals. It includes a small ML pipeline for training and a Flask web app for interactive predictions.
@@ -124,3 +125,7 @@ git push -u origin main
 
 - Replace the sample dataset with real airfare history for production use.
 - Keep training feature names identical to the fields submitted by the web app.
+=======
+# airfare-price-analytics
+End-to-end airfare price prediction and revenue optimization using Python, SQL, and statistical analysis.
+>>>>>>> 207bc5831b6227525e55040fba46ad12a60ac9dd
