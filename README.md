@@ -128,4 +128,3 @@ git push -u origin main
 =======
 # airfare-price-analytics
 End-to-end airfare price prediction and revenue optimization using Python, SQL, and statistical analysis.
->>>>>>> 207bc5831b6227525e55040fba46ad12a60ac9dd
